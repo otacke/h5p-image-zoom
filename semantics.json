@@ -109,11 +109,13 @@
         "default": true
       },
       {
-        "name": "dummy",
-        "type": "text",
-        "label": "Dummy to work around quirk in H5P Editor that doesn't need to be translated",
-        "importance": "low",
-        "widget": "none"
+        "name": "hideMagnificationIndicator",
+        "type": "boolean",
+        "label": "Hide magnification indicator",
+        "description": "The magnification indicator is used as the button for keyboard use. Hiding it will not prevent it from working, but users will have less navigational information.",
+        "default": false,
+        "optional": true,
+        "importance": "low"
       }
     ]
   },
@@ -125,18 +127,60 @@
       "importance": "low",
       "fields": [
         {
-          "name": "dummy1",
+          "name": "magnify",
           "type": "text",
-          "label": "Dummy to work around quirk in H5P Editor that doesn't need to be translated",
-          "importance": "low",
-          "widget": "none"
+          "label": "Magnify",
+          "description": "Label for magnification button (only visible to screenreader).",
+          "default": "Magnify",
+          "importance": "low"
         },
         {
-          "name": "dummy2",
+          "name": "magnified",
           "type": "text",
-          "label": "Dummy to work around quirk in H5P Editor that doesn't need to be translated",
-          "importance": "low",
-          "widget": "none"
+          "label": "Magnification activated.",
+          "description": "Read when the magnification was activated.",
+          "default": "Magnification activated.",
+          "importance": "low"
+        },
+        {
+          "name": "unmagnified",
+          "type": "text",
+          "label": "Magnification deactivated.",
+          "description": "Read when the magnification was deactivated.",
+          "default": "Magnification deactivated.",
+          "importance": "low"
+        },
+        {
+          "name": "instructions",
+          "type": "text",
+          "label": "Instructions",
+          "description": "Instructions on how to use the keyboard. Read when the magnification is activated",
+          "default": "Use arrow keys to move magnification lense. Use plus key to zoom in. Use minus key to zoom out.",
+          "importance": "low"
+        },
+        {
+          "name": "zoomedToScale",
+          "type": "text",
+          "label": "Zoomed to scale",
+          "description": "Read when the zoom scale is changed. @magnification is a placeholder that will be replaced by the respective value.",
+          "default": "Zoomed to scale of @magnification to 1.",
+          "importance": "low"
+        },
+        {
+          "name": "movedLenseTo",
+          "type": "text",
+          "label": "Moved lense to",
+          "description": "Read when the magnification lense is moved. @positionHorizontal and @positionVertical are placeholders that will be replaced by the respective values.",
+          "default": "Moved lense to @positionHorizontal horizontally and to @positionVertical vertically.",
+          "importance": "low"
+        },
+        {
+          "name": "unknown",
+          "type": "text",
+          "label": "Unknown",
+          "description": "Fallback text for when the position of the lense cannot be determined.",
+          "default": "unknown",
+          "importance": "low"
         }
       ]
   }

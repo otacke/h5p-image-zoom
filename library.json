@@ -23,6 +23,11 @@
   ],
   "preloadedDependencies": [
     {
+      "machineName": "H5P.Question",
+      "majorVersion": 1,
+      "minorVersion": 4
+    },
+    {
       "machineName": "H5P.Image",
       "majorVersion": 1,
       "minorVersion": 1

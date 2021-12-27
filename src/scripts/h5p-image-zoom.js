@@ -1,10 +1,10 @@
+import Dictionary from './h5p-image-zoom-dictionary';
 import Util from './h5p-image-zoom-util';
 
-// TODO: A11Y
 // TODO: Clean up
 // TODO: Mobile support: not requested, left to pinch zooming
 
-export default class ImageZoom extends H5P.EventDispatcher {
+export default class ImageZoom extends H5P.Question {
   /**
    * @constructor
    *
@@ -12,7 +12,7 @@ export default class ImageZoom extends H5P.EventDispatcher {
    * @param {number} contentId Content's id.
    */
   constructor(params, contentId) {
-    super();
+    super('image-zoom');
 
     // Set defaults
     this.params = Util.extend({
@@ -25,13 +25,16 @@ export default class ImageZoom extends H5P.EventDispatcher {
       },
       behaviour: {
         autoZoom: true,
+        hideMagnificationIndicator: false,
         zoomScales: '1, 1.25, 1.5, 2, 3, 5',
         zoomLevelDefault: 2
       }
     }, params);
     this.contentId = contentId;
 
-    this.isAutoZooming = this.params.behaviour.autoZoom;
+    // Dictionary provides default values
+    Dictionary.fill(this.params.a11y);
+
     this.zoomLenseSize = {
       width: this.sanititzeCSS(this.params.visual.zoomLenseWidth, { min: 1, default: '20 %' }),
       height: this.sanititzeCSS(this.params.visual.zoomLenseHeight, { min: 1, default: '25 %' })
@@ -146,12 +149,10 @@ export default class ImageZoom extends H5P.EventDispatcher {
 
   /**
    * Attach library to wrapper.
-   *
-   * @param {jQuery} $wrapper Content's container.
    */
-  attach($wrapper) {
-    this.container = $wrapper.get(0);
-    this.container.classList.add('h5p-image-zoom');
+  registerDomElements() {
+    this.container = document.createElement('div');
+    this.container.classList.add('h5p-image-zoom-container');
 
     if (this.params.behaviour.autoZoom) {
       this.container.classList.add('h5p-image-zoom-auto-zoom');
@@ -183,62 +184,6 @@ export default class ImageZoom extends H5P.EventDispatcher {
     );
     this.imageNavigation = this.imageInstance.$img.get(0);
     this.imageNavigation.setAttribute('draggable', false);
-    this.imageNavigation.setAttribute('role', 'button');
-    this.imageNavigation.setAttribute('tabindex', 1);
-    this.imageNavigation.addEventListener('keydown', (event) => {
-      if (event.key === ' ' || event.key === 'Enter') {
-        const imageRect = this.imageNavigation.getBoundingClientRect();
-        this.handleClick({
-          pageX: imageRect.width / 2,
-          pageY: imageRect.height / 2
-        });
-      }
-      else if (!this.isZooming) {
-        return;
-      }
-      else if (event.key === '+') {
-        event.deltaY = -1;
-        this.handleWheel(event);
-      }
-      else if (event.key === '-') {
-        event.deltaY = 1;
-        this.handleWheel(event);
-      }
-      else if (event.key === 'ArrowLeft') {
-        const lenseRect = this.wrapperLense.getBoundingClientRect();
-
-        this.updateLense({
-          x: lenseRect.left,
-          y: lenseRect.top + lenseRect.height / 2
-        });
-      }
-      else if (event.key === 'ArrowRight') {
-        const lenseRect = this.wrapperLense.getBoundingClientRect();
-
-        this.updateLense({
-          x: lenseRect.left + lenseRect.width,
-          y: lenseRect.top + lenseRect.height / 2
-        });
-      }
-      else if (event.key === 'ArrowUp') {
-        event.preventDefault();
-        const lenseRect = this.wrapperLense.getBoundingClientRect();
-
-        this.updateLense({
-          x: lenseRect.left + lenseRect.width / 2,
-          y: lenseRect.top
-        });
-      }
-      else if (event.key === 'ArrowDown') {
-        event.preventDefault();
-        const lenseRect = this.wrapperLense.getBoundingClientRect();
-
-        this.updateLense({
-          x: lenseRect.left + lenseRect.width / 2,
-          y: lenseRect.top + lenseRect.height
-        });
-      }
-    });
 
     this.imageNavigation.classList.add('h5p-image-zoom-image-navigation');
     if (this.params.visual.darkenImageOnZoom) {
@@ -276,7 +221,24 @@ export default class ImageZoom extends H5P.EventDispatcher {
     this.imageLense.classList.add('h5p-image-zoom-image-lense');
     this.displayNavigation.appendChild(this.wrapperLense);
 
-    $wrapper.append(this.displays);
+    this.container.appendChild(this.displays);
+
+    /*
+     * Toggle button
+     */
+    this.toggleButton = document.createElement('button');
+    this.toggleButton.classList.add('h5p-image-zoom-button-toggle');
+    if (this.params.behaviour.hideMagnificationIndicator) {
+      this.toggleButton.classList.add('h5p-image-zoom-button-toggle-hidden');
+    }
+    this.toggleButton.setAttribute('aria-pressed', 'false');
+    this.toggleButton.setAttribute('aria-label', Dictionary.get('magnify'));
+    this.toggleButton.addEventListener('keydown', (event) => {
+      this.handleKeydown(event);
+    });
+    this.displayNavigation.appendChild(this.toggleButton);
+
+    this.setContent(this.container);
   }
 
   /**
@@ -320,11 +282,9 @@ export default class ImageZoom extends H5P.EventDispatcher {
       `min(100%, ${zoomLenseSize.height}px)`;
 
     // Add event listeners
-    if (!this.params.behaviour.autoZoom) {
-      this.displayNavigation.addEventListener('click', event => {
-        this.handleClick(event);
-      });
-    }
+    this.displayNavigation.addEventListener('click', event => {
+      this.handleClick(event);
+    });
 
     this.displayNavigation.addEventListener('mouseover', () => {
       this.handleMouseOver();
@@ -365,6 +325,53 @@ export default class ImageZoom extends H5P.EventDispatcher {
     this.zoomLevel = zoomLevel;
     const zoomLenseSize = this.getZoomLenseSize();
     this.imageLense.style.transform = `scale(${this.getZoomScale(this.zoomLevel) / zoomLenseSize.widthFactor}, ${this.getZoomScale(this.zoomLevel) / zoomLenseSize.heightFactor})`;
+  }
+
+  /**
+   * Get Lense position as rounded percentage.
+   * @return {object} Position with x and y part.
+   */
+  getLensePosition() {
+    let positions = this.imageLense.style.transformOrigin.split(' ');
+    if (
+      positions.length === 2 &&
+      positions.every(position => /^\d*(.\d+)?%$/.test(position))
+    ) {
+      positions = positions.map((value) => {
+        return `${Math.round(parseFloat(value))} %`;
+      });
+    }
+    else {
+      positions = [Dictionary.get('unknown'), Dictionary.get('unknown')];
+    }
+
+    return {
+      x: positions[0],
+      y: positions[1]
+    };
+  }
+
+  /**
+   * Read lense position to screenreader.
+   */
+  readLensePosition() {
+    let x, y;
+    ({x, y} = this.getLensePosition());
+
+    const screenreaderText = Dictionary.get('movedLenseTo')
+      .replace(/@positionHorizontal/g, x)
+      .replace(/@positionVertical/g, y);
+
+    this.read(screenreaderText);
+  }
+
+  /**
+   * Read zoom scale to screenreader.
+   */
+  readZoomScale() {
+    const screenreaderText = Dictionary.get('zoomedToScale')
+      .replace(/@magnification/g, this.getZoomScale());
+    this.read(screenreaderText);
   }
 
   /**
@@ -411,6 +418,68 @@ export default class ImageZoom extends H5P.EventDispatcher {
   }
 
   /**
+   * Handle key down.
+   * @param {KeyEvent} event Key event.
+   */
+  handleKeydown(event) {
+    if (!this.isZooming) {
+      return;
+    }
+    else if (event.key === '+') {
+      event.deltaY = -1;
+      this.handleWheel(event);
+      this.readZoomScale();
+    }
+    else if (event.key === '-') {
+      event.deltaY = 1;
+      this.handleWheel(event);
+      this.readZoomScale();
+    }
+    else if (event.key === 'ArrowLeft') {
+      const lenseRect = this.wrapperLense.getBoundingClientRect();
+
+      this.updateLense({
+        x: lenseRect.left,
+        y: lenseRect.top + lenseRect.height / 2
+      });
+
+      this.readLensePosition();
+    }
+    else if (event.key === 'ArrowRight') {
+      const lenseRect = this.wrapperLense.getBoundingClientRect();
+
+      this.updateLense({
+        x: lenseRect.left + lenseRect.width,
+        y: lenseRect.top + lenseRect.height / 2
+      });
+
+      this.readLensePosition();
+    }
+    else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      const lenseRect = this.wrapperLense.getBoundingClientRect();
+
+      this.updateLense({
+        x: lenseRect.left + lenseRect.width / 2,
+        y: lenseRect.top
+      });
+
+      this.readLensePosition();
+    }
+    else if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      const lenseRect = this.wrapperLense.getBoundingClientRect();
+
+      this.updateLense({
+        x: lenseRect.left + lenseRect.width / 2,
+        y: lenseRect.top + lenseRect.height
+      });
+
+      this.readLensePosition();
+    }
+  }
+
+  /**
    * Handle mouse wheel change.
    * @param {Event} event Wheel event.
    */
@@ -431,33 +500,35 @@ export default class ImageZoom extends H5P.EventDispatcher {
    * @param {Event} event Click event.
    */
   handleClick(event) {
-    if (event instanceof MouseEvent) {
-      this.imageNavigation.focus();
-
-      if (!this.isAutoZooming) {
-        this.isAutoZooming = true;
-        this.handleMouseOver();
-        this.handleMouseMove(event);
+    if (!this.params.behaviour.autoZoom || event.target === this.toggleButton) {
+      if (this.isZooming) {
+        if (event.target === this.toggleButton) {
+          this.read(`${Dictionary.get('unmagnified')}`);
+        }
+        this.deactivateZoom();
       }
       else {
-        this.handleMouseOut();
-        if (!this.params.behaviour.autoZoom) {
-          this.isAutoZooming = false;
+        let position = {
+          x: event.pageX,
+          y: event.pageY
+        };
+
+        if (event.target === this.toggleButton) {
+          this.imageNavigation.focus();
+          this.read(`${Dictionary.get('magnified')} ${Dictionary.get('instructions')}`);
+
+          const imageRect = this.imageNavigation.getBoundingClientRect();
+          position = {
+            x: imageRect.left + imageRect.width / 2,
+            y: imageRect.height / 2
+          };
         }
+        this.activateZoom();
+        this.updateLense(position);
       }
     }
     else {
-      if (!this.isZooming) {
-        this.isAutoZooming = true;
-        this.handleMouseOver();
-        this.handleMouseMove(event);
-      }
-      else {
-        this.handleMouseOut();
-        if (!this.params.behaviour.autoZoom) {
-          this.isAutoZooming = false;
-        }
-      }
+      event.preventDefault();
     }
   }
 
@@ -465,13 +536,11 @@ export default class ImageZoom extends H5P.EventDispatcher {
    * Handle pointer enters image.
    */
   handleMouseOver() {
-    if (!this.isAutoZooming) {
+    if (!this.params.behaviour.autoZoom) {
       return;
     }
 
-    this.isZooming = true;
-    this.setZoomLevel(this.zoomLevel);
-    this.container.classList.add('h5p-image-zoom-active');
+    this.activateZoom();
   }
 
   /**
@@ -479,7 +548,10 @@ export default class ImageZoom extends H5P.EventDispatcher {
    * @param {Event} event Mouse event.
    */
   handleMouseMove(event) {
-    if (!this.isZooming) {
+    if (this.params.behaviour.autoZoom && !this.isZooming) {
+      this.activateZoom();
+    }
+    else if (!this.isZooming) {
       return;
     }
 
@@ -490,11 +562,23 @@ export default class ImageZoom extends H5P.EventDispatcher {
    * Handle pointer leaves image.
    */
   handleMouseOut() {
-    if (!this.isAutoZooming) {
+    if (!this.params.behaviour.autoZoom) {
       return;
     }
 
+    this.deactivateZoom();
+  }
+
+  activateZoom() {
+    this.isZooming = true;
+    this.toggleButton.setAttribute('aria-pressed', 'true');
+    this.container.classList.add('h5p-image-zoom-active');
+    this.setZoomLevel(this.zoomLevel);
+  }
+
+  deactivateZoom() {
     this.isZooming = false;
+    this.toggleButton.setAttribute('aria-pressed', 'false');
     this.container.classList.remove('h5p-image-zoom-active');
     this.setZoomLevel(null);
   }
