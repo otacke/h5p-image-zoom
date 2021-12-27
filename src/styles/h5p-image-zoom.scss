@@ -25,7 +25,7 @@
               }
             }
 
-            .h5p-image-zoom-wrapper-lense {
+            .h5p-image-zoom-wrapper-lens {
               opacity: 1;
             }
 
@@ -65,7 +65,7 @@
             }
           }
 
-          .h5p-image-zoom-wrapper-lense {
+          .h5p-image-zoom-wrapper-lens {
             border: 1px solid rgba(255, 255, 255, .5);
             box-shadow: .1em .1em 1em rgb(0, 0, 0, .5);
             box-sizing: border-box;
@@ -75,7 +75,7 @@
             pointer-events: none;
             transition: opacity $default-transition-duration $default-transition-timing-function;
 
-            .h5p-image-zoom-image-lense {
+            .h5p-image-zoom-image-lens {
               user-select: none;
             }
           }

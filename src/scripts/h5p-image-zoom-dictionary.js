@@ -51,8 +51,8 @@ Dictionary.DEFAULT_TRANSLATIONS = {
   magnify: 'Magnify',
   magnified: 'Magnification activated.',
   unmagnified: 'Magnification deactivated.',
-  instructions: 'Use arrow keys to move magnification lense. Use plus key to zoom in. Use minus key to zoom out.',
+  instructions: 'Use arrow keys to move magnification lens. Use plus key to zoom in. Use minus key to zoom out.',
   zoomedToScale: 'Zoomed to scale of @magnification to 1.',
-  movedLenseTo: 'Moved lense to @positionHorizontal horizontally and to @positionVertical vertically.',
+  movedLensTo: 'Moved lens to @positionHorizontal horizontally and to @positionVertical vertically.',
   unknown: 'unknown'
 };

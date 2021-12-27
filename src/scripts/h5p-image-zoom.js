@@ -16,8 +16,8 @@ export default class ImageZoom extends H5P.Question {
       visual: {
         imageWidth: '100%',
         imageAlignment: 'center',
-        zoomLenseWidth: '20%',
-        zoomLenseHeight: '25%',
+        zoomLensWidth: '20%',
+        zoomLensHeight: '25%',
         darkenImageOnZoom: true
       },
       behaviour: {
@@ -32,9 +32,9 @@ export default class ImageZoom extends H5P.Question {
     // Dictionary provides default values
     Dictionary.fill(this.params.a11y);
 
-    this.zoomLenseSize = {
-      width: this.sanititzeCSS(this.params.visual.zoomLenseWidth, { min: 1, default: '20 %' }),
-      height: this.sanititzeCSS(this.params.visual.zoomLenseHeight, { min: 1, default: '25 %' })
+    this.zoomLensSize = {
+      width: this.sanititzeCSS(this.params.visual.zoomLensWidth, { min: 1, default: '20 %' }),
+      height: this.sanititzeCSS(this.params.visual.zoomLensHeight, { min: 1, default: '25 %' })
     };
     this.zoomScales = this.params.behaviour.zoomScales.split(',');
 
@@ -163,20 +163,20 @@ export default class ImageZoom extends H5P.Question {
       this.handleImageLoaded();
     }
 
-    // Zoom lense
-    this.wrapperLense = document.createElement('div');
-    this.wrapperLense.classList.add('h5p-image-zoom-wrapper-lense');
+    // Zoom lens
+    this.wrapperLens = document.createElement('div');
+    this.wrapperLens.classList.add('h5p-image-zoom-wrapper-lens');
 
-    this.imageInstanceLense = H5P.newRunnable(
+    this.imageInstanceLens = H5P.newRunnable(
       this.params.image,
       this.contentId,
-      H5P.jQuery(this.wrapperLense),
+      H5P.jQuery(this.wrapperLens),
       true,
       {}
     );
-    this.imageLense = this.imageInstanceLense.$img.get(0);
-    this.imageLense.classList.add('h5p-image-zoom-image-lense');
-    this.displayNavigation.appendChild(this.wrapperLense);
+    this.imageLens = this.imageInstanceLens.$img.get(0);
+    this.imageLens.classList.add('h5p-image-zoom-image-lens');
+    this.displayNavigation.appendChild(this.wrapperLens);
 
     // Toggle button
     this.toggleButton = document.createElement('button');
@@ -235,8 +235,8 @@ export default class ImageZoom extends H5P.Question {
     }
 
     this.zoomLevel = zoomLevel;
-    const lenseSize = this.getLenseSize();
-    this.imageLense.style.transform = `scale(${this.getZoomScale(this.zoomLevel) / lenseSize.widthFactor}, ${this.getZoomScale(this.zoomLevel) / lenseSize.heightFactor})`;
+    const lensSize = this.getLensSize();
+    this.imageLens.style.transform = `scale(${this.getZoomScale(this.zoomLevel) / lensSize.widthFactor}, ${this.getZoomScale(this.zoomLevel) / lensSize.heightFactor})`;
   }
 
   /**
@@ -260,14 +260,14 @@ export default class ImageZoom extends H5P.Question {
   }
 
   /**
-   * Get zoom lense width and height as percentage.
-   * @return {object} Zoom lense width and height as percentage.
+   * Get zoom lens width and height as percentage.
+   * @return {object} Zoom lens width and height as percentage.
    */
-  getLenseSize() {
+  getLensSize() {
     let imageRect;
 
-    const widthValue = parseFloat(this.zoomLenseSize.width.split(' ')[0]);
-    const widthUnit = this.zoomLenseSize.width.split(' ')[1];
+    const widthValue = parseFloat(this.zoomLensSize.width.split(' ')[0]);
+    const widthUnit = this.zoomLensSize.width.split(' ')[1];
     let widthFactor;
     if (widthUnit === '%') {
       widthFactor = widthValue / 100;
@@ -277,8 +277,8 @@ export default class ImageZoom extends H5P.Question {
       widthFactor = Math.min(widthValue / imageRect.width, 1);
     }
 
-    const heightValue = parseFloat(this.zoomLenseSize.height.split(' ')[0]);
-    const heightUnit = this.zoomLenseSize.height.split(' ')[1];
+    const heightValue = parseFloat(this.zoomLensSize.height.split(' ')[0]);
+    const heightUnit = this.zoomLensSize.height.split(' ')[1];
     let heightFactor;
     if (heightUnit === '%') {
       heightFactor = heightValue / 100;
@@ -299,11 +299,11 @@ export default class ImageZoom extends H5P.Question {
   }
 
   /**
-   * Get Lense position as rounded percentage.
+   * Get Lens position as rounded percentage.
    * @return {object} Position with x and y part.
    */
-  getLensePosition() {
-    let positions = this.imageLense.style.transformOrigin.split(' ');
+  getLensPosition() {
+    let positions = this.imageLens.style.transformOrigin.split(' ');
     if (
       positions.length === 2 &&
       positions.every(position => /^\d*(.\d+)?%$/.test(position))
@@ -323,43 +323,43 @@ export default class ImageZoom extends H5P.Question {
   }
 
   /**
-   * Update lense.
+   * Update lens.
    * @param {object} position Pointer position on screen.
    * @param {number} position.x X pointer position.
    * @param {number} position.y Y pointer position.
    */
-  setLensePosition(position) {
+  setLensPosition(position) {
     const imageRect = this.imageNavigation.getBoundingClientRect();
-    const lenseRect = this.wrapperLense.getBoundingClientRect();
+    const lensRect = this.wrapperLens.getBoundingClientRect();
 
     const imagePointerPosition = {
       x: position.x - imageRect.left,
       y: position.y - imageRect.top
     };
 
-    const lensePosition = {
-      x: Math.max(0, Math.min(imagePointerPosition.x - lenseRect.width / 2, imageRect.width - lenseRect.width)),
-      y: Math.max(0, Math.min(imagePointerPosition.y - lenseRect.height / 2, imageRect.height - lenseRect.height))
+    const lensPosition = {
+      x: Math.max(0, Math.min(imagePointerPosition.x - lensRect.width / 2, imageRect.width - lensRect.width)),
+      y: Math.max(0, Math.min(imagePointerPosition.y - lensRect.height / 2, imageRect.height - lensRect.height))
     };
 
-    const lensePositionPercentage = {
-      x: lensePosition.x / imageRect.width * 100,
-      y: lensePosition.y / imageRect.height * 100
+    const lensPositionPercentage = {
+      x: lensPosition.x / imageRect.width * 100,
+      y: lensPosition.y / imageRect.height * 100
     };
 
-    this.wrapperLense.style.left = `${lensePositionPercentage.x}%`;
-    this.wrapperLense.style.top = `${lensePositionPercentage.y}%`;
+    this.wrapperLens.style.left = `${lensPositionPercentage.x}%`;
+    this.wrapperLens.style.top = `${lensPositionPercentage.y}%`;
 
-    const lenseOffsets = {
-      minX: lenseRect.width / 2,
-      maxX: imageRect.width - lenseRect.width / 2,
-      minY: lenseRect.height / 2,
-      maxY: imageRect.height - lenseRect.height / 2
+    const lensOffsets = {
+      minX: lensRect.width / 2,
+      maxX: imageRect.width - lensRect.width / 2,
+      minY: lensRect.height / 2,
+      maxY: imageRect.height - lensRect.height / 2
     };
 
     const cappedPosition = {
-      x: Math.max(lenseOffsets.minX, Math.min(imagePointerPosition.x, lenseOffsets.maxX)),
-      y: Math.max(lenseOffsets.minY, Math.min(imagePointerPosition.y, lenseOffsets.maxY))
+      x: Math.max(lensOffsets.minX, Math.min(imagePointerPosition.x, lensOffsets.maxX)),
+      y: Math.max(lensOffsets.minY, Math.min(imagePointerPosition.y, lensOffsets.maxY))
     };
 
     /*
@@ -367,21 +367,21 @@ export default class ImageZoom extends H5P.Question {
      * Will still be read as 100% to screenreader due to rounding
      */
     const cappedPositionPercentage = {
-      x: Util.project(cappedPosition.x, lenseOffsets.minX, lenseOffsets.maxX, 0, 99.5),
-      y: Util.project(cappedPosition.y, lenseOffsets.minY, lenseOffsets.maxY, 0, 99.5)
+      x: Util.project(cappedPosition.x, lensOffsets.minX, lensOffsets.maxX, 0, 99.5),
+      y: Util.project(cappedPosition.y, lensOffsets.minY, lensOffsets.maxY, 0, 99.5)
     };
 
-    this.imageLense.style.transformOrigin = `${cappedPositionPercentage.x}% ${cappedPositionPercentage.y}%`;
+    this.imageLens.style.transformOrigin = `${cappedPositionPercentage.x}% ${cappedPositionPercentage.y}%`;
   }
 
   /**
-   * Read lense position to screenreader.
+   * Read lens position to screenreader.
    */
-  readLensePosition() {
+  readLensPosition() {
     let x, y;
-    ({ x, y } = this.getLensePosition());
+    ({ x, y } = this.getLensPosition());
 
-    const screenreaderText = Dictionary.get('movedLenseTo')
+    const screenreaderText = Dictionary.get('movedLensTo')
       .replace(/@positionHorizontal/g, x)
       .replace(/@positionVertical/g, y);
 
@@ -411,16 +411,16 @@ export default class ImageZoom extends H5P.Question {
       this.params.visual.imageWidth;
     this.displays.style.width = width;
 
-    // Set zoom lense size.
-    const zoomLenseSize = this.getLenseSize();
+    // Set zoom lens size.
+    const zoomLensSize = this.getLensSize();
 
-    this.wrapperLense.style.width = (zoomLenseSize.widthUnit === '%') ?
-      `calc(100% * ${zoomLenseSize.widthFactor})` :
-      `min(100%, ${zoomLenseSize.width}px)`;
+    this.wrapperLens.style.width = (zoomLensSize.widthUnit === '%') ?
+      `calc(100% * ${zoomLensSize.widthFactor})` :
+      `min(100%, ${zoomLensSize.width}px)`;
 
-    this.wrapperLense.style.height = (zoomLenseSize.heightUnit === '%') ?
-      `calc(100% * ${zoomLenseSize.heightFactor})` :
-      `min(100%, ${zoomLenseSize.height}px)`;
+    this.wrapperLens.style.height = (zoomLensSize.heightUnit === '%') ?
+      `calc(100% * ${zoomLensSize.heightFactor})` :
+      `min(100%, ${zoomLensSize.height}px)`;
 
     this.addEventListeners();
 
@@ -476,28 +476,28 @@ export default class ImageZoom extends H5P.Question {
     }
     else if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
       event.preventDefault();
-      const lenseRect = this.wrapperLense.getBoundingClientRect();
+      const lensRect = this.wrapperLens.getBoundingClientRect();
 
-      let x = lenseRect.left;
-      let y = lenseRect.top;
+      let x = lensRect.left;
+      let y = lensRect.top;
 
       if (event.key === 'ArrowLeft') {
-        y += lenseRect.height / 2;
+        y += lensRect.height / 2;
       }
       else if (event.key === 'ArrowRight') {
-        x += lenseRect.width;
-        y += lenseRect.height / 2;
+        x += lensRect.width;
+        y += lensRect.height / 2;
       }
       else if (event.key === 'ArrowUp') {
-        x += lenseRect.width / 2;
+        x += lensRect.width / 2;
       }
       else if (event.key === 'ArrowDown') {
-        x += lenseRect.width / 2;
-        y += lenseRect.height;
+        x += lensRect.width / 2;
+        y += lensRect.height;
       }
 
-      this.setLensePosition({ x: x, y: y });
-      this.readLensePosition();
+      this.setLensPosition({ x: x, y: y });
+      this.readLensPosition();
     }
   }
 
@@ -526,7 +526,7 @@ export default class ImageZoom extends H5P.Question {
 
     if (this.params.behaviour.autoZoom && event.target !== this.toggleButton) {
       event.preventDefault();
-      return; // Was click on lense
+      return; // Was click on lens
     }
 
     if (this.isZooming) {
@@ -556,7 +556,7 @@ export default class ImageZoom extends H5P.Question {
       }
 
       this.activateZoom();
-      this.setLensePosition(position);
+      this.setLensPosition(position);
     }
   }
 
@@ -583,7 +583,7 @@ export default class ImageZoom extends H5P.Question {
       return;
     }
 
-    this.setLensePosition({ x: event.pageX, y: event.pageY });
+    this.setLensPosition({ x: event.pageX, y: event.pageY });
   }
 
   /**
