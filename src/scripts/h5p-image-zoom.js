@@ -1,5 +1,9 @@
 import Util from './h5p-image-zoom-util';
 
+// TODO: A11Y
+// TODO: Clean up
+// TODO: Mobile support: not requested, left to pinch zooming
+
 export default class ImageZoom extends H5P.EventDispatcher {
   /**
    * @constructor
@@ -158,9 +162,6 @@ export default class ImageZoom extends H5P.EventDispatcher {
       this.container.style.alignItems = this.params.visual.imageAlignment;
     }
 
-    // TODO: Mobile handling ?
-    // TODO: A11Y
-
     this.displays = document.createElement('div');
     this.displays.classList.add('h5p-image-zoom-displays');
 
@@ -182,6 +183,63 @@ export default class ImageZoom extends H5P.EventDispatcher {
     );
     this.imageNavigation = this.imageInstance.$img.get(0);
     this.imageNavigation.setAttribute('draggable', false);
+    this.imageNavigation.setAttribute('role', 'button');
+    this.imageNavigation.setAttribute('tabindex', 1);
+    this.imageNavigation.addEventListener('keydown', (event) => {
+      if (event.key === ' ' || event.key === 'Enter') {
+        const imageRect = this.imageNavigation.getBoundingClientRect();
+        this.handleClick({
+          pageX: imageRect.width / 2,
+          pageY: imageRect.height / 2
+        });
+      }
+      else if (!this.isZooming) {
+        return;
+      }
+      else if (event.key === '+') {
+        event.deltaY = -1;
+        this.handleWheel(event);
+      }
+      else if (event.key === '-') {
+        event.deltaY = 1;
+        this.handleWheel(event);
+      }
+      else if (event.key === 'ArrowLeft') {
+        const lenseRect = this.wrapperLense.getBoundingClientRect();
+
+        this.updateLense({
+          x: lenseRect.left,
+          y: lenseRect.top + lenseRect.height / 2
+        });
+      }
+      else if (event.key === 'ArrowRight') {
+        const lenseRect = this.wrapperLense.getBoundingClientRect();
+
+        this.updateLense({
+          x: lenseRect.left + lenseRect.width,
+          y: lenseRect.top + lenseRect.height / 2
+        });
+      }
+      else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        const lenseRect = this.wrapperLense.getBoundingClientRect();
+
+        this.updateLense({
+          x: lenseRect.left + lenseRect.width / 2,
+          y: lenseRect.top
+        });
+      }
+      else if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        const lenseRect = this.wrapperLense.getBoundingClientRect();
+
+        this.updateLense({
+          x: lenseRect.left + lenseRect.width / 2,
+          y: lenseRect.top + lenseRect.height
+        });
+      }
+    });
+
     this.imageNavigation.classList.add('h5p-image-zoom-image-navigation');
     if (this.params.visual.darkenImageOnZoom) {
       this.imageNavigation.classList.add('h5p-image-zoom-darken');
@@ -361,7 +419,9 @@ export default class ImageZoom extends H5P.EventDispatcher {
       return;
     }
 
-    event.preventDefault(); // Don't scroll page.
+    if (event instanceof WheelEvent) {
+      event.preventDefault(); // Don't scroll page.
+    }
 
     this.setZoomLevel(Math.max(0, Math.min(this.zoomLevel - Math.sign(event.deltaY), this.zoomScales.length - 1)));
   }
@@ -371,15 +431,33 @@ export default class ImageZoom extends H5P.EventDispatcher {
    * @param {Event} event Click event.
    */
   handleClick(event) {
-    if (!this.isAutoZooming) {
-      this.isAutoZooming = true;
-      this.handleMouseOver();
-      this.handleMouseMove(event);
+    if (event instanceof MouseEvent) {
+      if (!this.isAutoZooming) {
+        this.isAutoZooming = true;
+        this.handleMouseOver();
+        this.handleMouseMove(event);
+      }
+      else {
+        this.handleMouseOut();
+        if (!this.params.behaviour.autoZoom) {
+          this.isAutoZooming = false;
+        }
+      }
     }
     else {
-      this.handleMouseOut();
-      this.isAutoZooming = false;
+      if (!this.isZooming) {
+        this.isAutoZooming = true;
+        this.handleMouseOver();
+        this.handleMouseMove(event);
+      }
+      else {
+        this.handleMouseOut();
+        if (!this.params.behaviour.autoZoom) {
+          this.isAutoZooming = false;
+        }
+      }
     }
+
   }
 
   /**
@@ -393,6 +471,7 @@ export default class ImageZoom extends H5P.EventDispatcher {
     this.isZooming = true;
     this.setZoomLevel(this.zoomLevel);
     this.container.classList.add('h5p-image-zoom-active');
+    this.imageNavigation.focus();
   }
 
   /**
