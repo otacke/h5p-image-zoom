@@ -432,6 +432,8 @@ export default class ImageZoom extends H5P.EventDispatcher {
    */
   handleClick(event) {
     if (event instanceof MouseEvent) {
+      this.imageNavigation.focus();
+
       if (!this.isAutoZooming) {
         this.isAutoZooming = true;
         this.handleMouseOver();
@@ -457,7 +459,6 @@ export default class ImageZoom extends H5P.EventDispatcher {
         }
       }
     }
-
   }
 
   /**
@@ -471,7 +472,6 @@ export default class ImageZoom extends H5P.EventDispatcher {
     this.isZooming = true;
     this.setZoomLevel(this.zoomLevel);
     this.container.classList.add('h5p-image-zoom-active');
-    this.imageNavigation.focus();
   }
 
   /**
