@@ -10,7 +10,7 @@
       "fields": [
         {
           "label": "Image width",
-          "description": "Select the width of the space given that the image should cover. The image's height will be scaled accordingly.",
+          "description": "Select the width of the space given that the image should cover. The image's height will be scaled accordingly and never exceed 100% width.",
           "options": [
             {
               "label": "35 %"

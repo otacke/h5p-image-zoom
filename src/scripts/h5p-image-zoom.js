@@ -396,7 +396,7 @@ export default class ImageZoom extends H5P.Question {
   handleImageLoaded() {
     // Set image width
     const width = this.params.visual.imageWidth === 'natural' ?
-      `${this.imageNavigation.naturalWidth}px` :
+      `min(${this.imageNavigation.naturalWidth}px, 100%)` :
       this.params.visual.imageWidth;
     this.displays.style.width = width;
 
