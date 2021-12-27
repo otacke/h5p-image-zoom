@@ -409,9 +409,13 @@ export default class ImageZoom extends H5P.Question {
       y: Math.max(lenseOffsets.minY, Math.min(imagePointerPosition.y, lenseOffsets.maxY))
     };
 
+    /*
+     * 99.5 instead of 100, because otherwise magnification may cause margin.
+     * Will still be read as 100% to screenreader due to rounding
+     */
     const cappedPositionPercentage = {
-      x: Util.project(cappedPosition.x, lenseOffsets.minX, lenseOffsets.maxX, 0, 100),
-      y: Util.project(cappedPosition.y, lenseOffsets.minY, lenseOffsets.maxY, 0, 100)
+      x: Util.project(cappedPosition.x, lenseOffsets.minX, lenseOffsets.maxX, 0, 99.5),
+      y: Util.project(cappedPosition.y, lenseOffsets.minY, lenseOffsets.maxY, 0, 99.5)
     };
 
     this.imageLense.style.transformOrigin = `${cappedPositionPercentage.x}% ${cappedPositionPercentage.y}%`;
