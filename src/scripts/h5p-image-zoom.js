@@ -1,9 +1,6 @@
 import Dictionary from './h5p-image-zoom-dictionary';
 import Util from './h5p-image-zoom-util';
 
-// TODO: Clean up
-// TODO: Mobile support: not requested, left to pinch zooming
-
 export default class ImageZoom extends H5P.Question {
   /**
    * @constructor
@@ -109,10 +106,157 @@ export default class ImageZoom extends H5P.Question {
   }
 
   /**
+   * Attach content.
+   */
+  registerDomElements() {
+    this.container = document.createElement('div');
+    this.container.classList.add('h5p-image-zoom-container');
+
+    if (this.params.behaviour.autoZoom) {
+      this.container.classList.add('h5p-image-zoom-auto-zoom');
+    }
+
+    // Set image alignment
+    if (this.params.visual.imageAlignment !== 'center') {
+      this.container.style.alignItems = this.params.visual.imageAlignment;
+    }
+
+    // Leave room for side by side option in the future
+    this.displays = document.createElement('div');
+    this.displays.classList.add('h5p-image-zoom-displays');
+
+    // Navigation
+    this.displayNavigation = document.createElement('div');
+    this.displayNavigation.classList.add('h5p-image-zoom-display-navigation');
+
+    const wrapperNavigation = document.createElement('div');
+    wrapperNavigation.classList.add('h5p-image-zoom-wrapper-navigation');
+
+    this.imageInstance = H5P.newRunnable(
+      this.params.image,
+      this.contentId,
+      H5P.jQuery(wrapperNavigation),
+      true,
+      {}
+    );
+    this.imageNavigation = this.imageInstance.$img.get(0);
+    this.imageNavigation.setAttribute('draggable', false);
+
+    this.imageNavigation.classList.add('h5p-image-zoom-image-navigation');
+    if (this.params.visual.darkenImageOnZoom) {
+      this.imageNavigation.classList.add('h5p-image-zoom-darken');
+    }
+
+    this.displayNavigation.appendChild(wrapperNavigation);
+    this.displays.appendChild(this.displayNavigation);
+
+    if (this.params.image?.params?.file) {
+      this.imageInstance.on('loaded', () => {
+        this.handleImageLoaded();
+      });
+    }
+    else {
+      // H5P.Image provides SVG placeholder that needs height
+      wrapperNavigation.classList.add('h5p-image-zoom-image-placeholder');
+      this.handleImageLoaded();
+    }
+
+    // Zoom lense
+    this.wrapperLense = document.createElement('div');
+    this.wrapperLense.classList.add('h5p-image-zoom-wrapper-lense');
+
+    this.imageInstanceLense = H5P.newRunnable(
+      this.params.image,
+      this.contentId,
+      H5P.jQuery(this.wrapperLense),
+      true,
+      {}
+    );
+    this.imageLense = this.imageInstanceLense.$img.get(0);
+    this.imageLense.classList.add('h5p-image-zoom-image-lense');
+    this.displayNavigation.appendChild(this.wrapperLense);
+
+    // Toggle button
+    this.toggleButton = document.createElement('button');
+    this.toggleButton.classList.add('h5p-image-zoom-button-toggle');
+    if (this.params.behaviour.hideMagnificationIndicator) {
+      this.toggleButton.classList.add('h5p-image-zoom-button-toggle-hidden');
+    }
+    this.toggleButton.setAttribute('aria-pressed', 'false');
+    this.toggleButton.setAttribute('aria-label', Dictionary.get('magnify'));
+    this.displayNavigation.appendChild(this.toggleButton);
+
+    this.container.appendChild(this.displays);
+
+    this.setContent(this.container);
+  }
+
+  /**
+   * Get zoom scale.
+   * @param {number} [zoomLevel] Zoom level, defaults to global state.
+   * @return {number} Zoom scale.
+   */
+  getZoomScale(zoomLevel) {
+    zoomLevel = zoomLevel || this.zoomLevel;
+
+    if (
+      typeof zoomLevel !== 'number' ||
+      zoomLevel < 0 ||
+      zoomLevel >= this.zoomScales.length
+    ) {
+      return;
+    }
+
+    return this.zoomScales[zoomLevel];
+  }
+
+  /**
+   * Set zoom level.
+   * @param {number|null} zoomLevel Zoom level to set, null to reset.
+   */
+  setZoomLevel(zoomLevel) {
+    if (zoomLevel === null) {
+      zoomLevel = Math.floor(this.zoomScales.length / this.params.behaviour.zoomLevelDefault);
+    }
+
+    if (
+      typeof zoomLevel !== 'number' ||
+      zoomLevel < 0 ||
+      zoomLevel >= this.zoomScales.length
+    ) {
+      return;
+    }
+
+    this.zoomLevel = zoomLevel;
+    const lenseSize = this.getLenseSize();
+    this.imageLense.style.transform = `scale(${this.getZoomScale(this.zoomLevel) / lenseSize.widthFactor}, ${this.getZoomScale(this.zoomLevel) / lenseSize.heightFactor})`;
+  }
+
+  /**
+   * Activate zoom.
+   */
+  activateZoom() {
+    this.isZooming = true;
+    this.toggleButton.setAttribute('aria-pressed', 'true');
+    this.container.classList.add('h5p-image-zoom-active');
+    this.setZoomLevel(this.zoomLevel);
+  }
+
+  /**
+   * Deactivate zoom.
+   */
+  deactivateZoom() {
+    this.isZooming = false;
+    this.toggleButton.setAttribute('aria-pressed', 'false');
+    this.container.classList.remove('h5p-image-zoom-active');
+    this.setZoomLevel(null);
+  }
+
+  /**
    * Get zoom lense width and height as percentage.
    * @return {object} Zoom lense width and height as percentage.
    */
-  getZoomLenseSize() {
+  getLenseSize() {
     let imageRect;
 
     const widthValue = parseFloat(this.zoomLenseSize.width.split(' ')[0]);
@@ -148,187 +292,6 @@ export default class ImageZoom extends H5P.Question {
   }
 
   /**
-   * Attach library to wrapper.
-   */
-  registerDomElements() {
-    this.container = document.createElement('div');
-    this.container.classList.add('h5p-image-zoom-container');
-
-    if (this.params.behaviour.autoZoom) {
-      this.container.classList.add('h5p-image-zoom-auto-zoom');
-    }
-
-    // Set image alignment
-    if (this.params.visual.imageAlignment !== 'center') {
-      this.container.style.alignItems = this.params.visual.imageAlignment;
-    }
-
-    this.displays = document.createElement('div');
-    this.displays.classList.add('h5p-image-zoom-displays');
-
-    this.displayNavigation = document.createElement('div');
-    this.displayNavigation.classList.add('h5p-image-zoom-display-navigation');
-
-    /*
-     * Navigation wrapper
-     */
-    const wrapperNavigation = document.createElement('div');
-    wrapperNavigation.classList.add('h5p-image-zoom-wrapper-navigation');
-
-    this.imageInstance = H5P.newRunnable(
-      this.params.image,
-      this.contentId,
-      H5P.jQuery(wrapperNavigation),
-      true,
-      {}
-    );
-    this.imageNavigation = this.imageInstance.$img.get(0);
-    this.imageNavigation.setAttribute('draggable', false);
-
-    this.imageNavigation.classList.add('h5p-image-zoom-image-navigation');
-    if (this.params.visual.darkenImageOnZoom) {
-      this.imageNavigation.classList.add('h5p-image-zoom-darken');
-    }
-
-    this.displayNavigation.appendChild(wrapperNavigation);
-    this.displays.appendChild(this.displayNavigation);
-
-    if (this.params.image?.params?.file) {
-      this.imageInstance.on('loaded', () => {
-        this.handleImageLoaded();
-      });
-    }
-    else {
-      // H5P.Image provides SVG placeholder that needs height
-      wrapperNavigation.classList.add('h5p-image-zoom-image-placeholder');
-      this.handleImageLoaded();
-    }
-
-    /*
-     * Zoom lense
-     */
-    this.wrapperLense = document.createElement('div');
-    this.wrapperLense.classList.add('h5p-image-zoom-wrapper-lense');
-
-    this.imageInstanceLense = H5P.newRunnable(
-      this.params.image,
-      this.contentId,
-      H5P.jQuery(this.wrapperLense),
-      true,
-      {}
-    );
-    this.imageLense = this.imageInstanceLense.$img.get(0);
-    this.imageLense.classList.add('h5p-image-zoom-image-lense');
-    this.displayNavigation.appendChild(this.wrapperLense);
-
-    this.container.appendChild(this.displays);
-
-    /*
-     * Toggle button
-     */
-    this.toggleButton = document.createElement('button');
-    this.toggleButton.classList.add('h5p-image-zoom-button-toggle');
-    if (this.params.behaviour.hideMagnificationIndicator) {
-      this.toggleButton.classList.add('h5p-image-zoom-button-toggle-hidden');
-    }
-    this.toggleButton.setAttribute('aria-pressed', 'false');
-    this.toggleButton.setAttribute('aria-label', Dictionary.get('magnify'));
-    this.displayNavigation.appendChild(this.toggleButton);
-
-    this.setContent(this.container);
-  }
-
-  /**
-   * Get zoom scale.
-   * @param {number} [zoomLevel] Zoom level, defaults to global state.
-   * @return {number} Zoom scale.
-   */
-  getZoomScale(zoomLevel) {
-    zoomLevel = zoomLevel || this.zoomLevel;
-
-    if (
-      typeof zoomLevel !== 'number' ||
-      zoomLevel < 0 ||
-      zoomLevel >= this.zoomScales.length
-    ) {
-      return;
-    }
-
-    return this.zoomScales[zoomLevel];
-  }
-
-  /**
-   * Handle image loaded.
-   */
-  handleImageLoaded() {
-    // Set image width
-    const width = this.params.visual.imageWidth === 'natural' ?
-      `${this.imageNavigation.naturalWidth}px` :
-      this.params.visual.imageWidth;
-    this.displays.style.width = width;
-
-    // Set zoom lense size.
-    const zoomLenseSize = this.getZoomLenseSize();
-
-    this.wrapperLense.style.width = (zoomLenseSize.widthUnit === '%') ?
-      `calc(100% * ${zoomLenseSize.widthFactor})` :
-      `min(100%, ${zoomLenseSize.width}px)`;
-
-    this.wrapperLense.style.height = (zoomLenseSize.heightUnit === '%') ?
-      `calc(100% * ${zoomLenseSize.heightFactor})` :
-      `min(100%, ${zoomLenseSize.height}px)`;
-
-    // Add event listeners
-    this.displayNavigation.addEventListener('click', event => {
-      this.handleClick(event);
-    });
-
-    this.displayNavigation.addEventListener('mouseover', () => {
-      this.handleMouseOver();
-    });
-
-    this.displayNavigation.addEventListener('mousemove', event => {
-      this.handleMouseMove(event);
-    });
-
-    this.displayNavigation.addEventListener('mouseout', (event) => {
-      this.handleMouseOut(event);
-    });
-
-    this.displayNavigation.addEventListener('wheel', event => {
-      this.handleWheel(event);
-    });
-
-    this.toggleButton.addEventListener('keydown', (event) => {
-      this.handleKeydown(event);
-    });
-
-    this.trigger('resize');
-  }
-
-  /**
-   * Set zoom level.
-   * @param {number|null} zoomLevel Zoom level to set, null to reset.
-   */
-  setZoomLevel(zoomLevel) {
-    if (zoomLevel === null) {
-      zoomLevel = Math.floor(this.zoomScales.length / this.params.behaviour.zoomLevelDefault);
-    }
-
-    if (
-      typeof zoomLevel !== 'number' ||
-      zoomLevel < 0 ||
-      zoomLevel >= this.zoomScales.length
-    ) {
-      return;
-    }
-
-    this.zoomLevel = zoomLevel;
-    const zoomLenseSize = this.getZoomLenseSize();
-    this.imageLense.style.transform = `scale(${this.getZoomScale(this.zoomLevel) / zoomLenseSize.widthFactor}, ${this.getZoomScale(this.zoomLevel) / zoomLenseSize.heightFactor})`;
-  }
-
-  /**
    * Get Lense position as rounded percentage.
    * @return {object} Position with x and y part.
    */
@@ -353,35 +316,12 @@ export default class ImageZoom extends H5P.Question {
   }
 
   /**
-   * Read lense position to screenreader.
-   */
-  readLensePosition() {
-    let x, y;
-    ({x, y} = this.getLensePosition());
-
-    const screenreaderText = Dictionary.get('movedLenseTo')
-      .replace(/@positionHorizontal/g, x)
-      .replace(/@positionVertical/g, y);
-
-    this.read(screenreaderText);
-  }
-
-  /**
-   * Read zoom scale to screenreader.
-   */
-  readZoomScale() {
-    const screenreaderText = Dictionary.get('zoomedToScale')
-      .replace(/@magnification/g, this.getZoomScale());
-    this.read(screenreaderText);
-  }
-
-  /**
    * Update lense.
    * @param {object} position Pointer position on screen.
    * @param {number} position.x X pointer position.
    * @param {number} position.y Y pointer position.
    */
-  updateLense(position) {
+  setLensePosition(position) {
     const imageRect = this.imageNavigation.getBoundingClientRect();
     const lenseRect = this.wrapperLense.getBoundingClientRect();
 
@@ -395,8 +335,13 @@ export default class ImageZoom extends H5P.Question {
       y: Math.max(0, Math.min(imagePointerPosition.y - lenseRect.height / 2, imageRect.height - lenseRect.height))
     };
 
-    this.wrapperLense.style.left = `${lensePosition.x}px`;
-    this.wrapperLense.style.top = `${lensePosition.y}px`;
+    const lensePositionPercentage = {
+      x: lensePosition.x / imageRect.width * 100,
+      y: lensePosition.y / imageRect.height * 100
+    };
+
+    this.wrapperLense.style.left = `${lensePositionPercentage.x}%`;
+    this.wrapperLense.style.top = `${lensePositionPercentage.y}%`;
 
     const lenseOffsets = {
       minX: lenseRect.width / 2,
@@ -423,6 +368,85 @@ export default class ImageZoom extends H5P.Question {
   }
 
   /**
+   * Read lense position to screenreader.
+   */
+  readLensePosition() {
+    let x, y;
+    ({ x, y } = this.getLensePosition());
+
+    const screenreaderText = Dictionary.get('movedLenseTo')
+      .replace(/@positionHorizontal/g, x)
+      .replace(/@positionVertical/g, y);
+
+    this.read(screenreaderText);
+  }
+
+  /**
+   * Read zoom scale to screenreader.
+   */
+  readZoomScale() {
+    const screenreaderText = Dictionary.get('zoomedToScale')
+      .replace(/@magnification/g, this.getZoomScale());
+    this.read(screenreaderText);
+  }
+
+  /**
+   * Handle image loaded.
+   */
+  handleImageLoaded() {
+    // Set image width
+    const width = this.params.visual.imageWidth === 'natural' ?
+      `${this.imageNavigation.naturalWidth}px` :
+      this.params.visual.imageWidth;
+    this.displays.style.width = width;
+
+    // Set zoom lense size.
+    const zoomLenseSize = this.getLenseSize();
+
+    this.wrapperLense.style.width = (zoomLenseSize.widthUnit === '%') ?
+      `calc(100% * ${zoomLenseSize.widthFactor})` :
+      `min(100%, ${zoomLenseSize.width}px)`;
+
+    this.wrapperLense.style.height = (zoomLenseSize.heightUnit === '%') ?
+      `calc(100% * ${zoomLenseSize.heightFactor})` :
+      `min(100%, ${zoomLenseSize.height}px)`;
+
+    this.addEventListeners();
+
+    this.trigger('resize');
+  }
+
+  /**
+   * Add event listeners
+   */
+  addEventListeners() {
+    // Also handles enter/space on toggle button
+    this.displayNavigation.addEventListener('click', event => {
+      this.handleClick(event);
+    });
+
+    this.displayNavigation.addEventListener('mouseover', () => {
+      this.handleMouseOver();
+    });
+
+    this.displayNavigation.addEventListener('mousemove', event => {
+      this.handleMouseMove(event);
+    });
+
+    this.displayNavigation.addEventListener('mouseout', (event) => {
+      this.handleMouseOut(event);
+    });
+
+    this.displayNavigation.addEventListener('wheel', event => {
+      this.handleWheel(event);
+    });
+
+    this.toggleButton.addEventListener('keydown', (event) => {
+      this.handleKeydown(event);
+    });
+  }
+
+  /**
    * Handle key down.
    * @param {KeyEvent} event Key event.
    */
@@ -430,56 +454,38 @@ export default class ImageZoom extends H5P.Question {
     if (!this.isZooming) {
       return;
     }
-    else if (event.key === '+') {
-      event.deltaY = -1;
-      this.handleWheel(event);
+
+    if (event.key === '+') {
+      this.setZoomLevel(Math.max(0, Math.min(this.zoomLevel + 1, this.zoomScales.length - 1)));
       this.readZoomScale();
     }
     else if (event.key === '-') {
-      event.deltaY = 1;
-      this.handleWheel(event);
+      this.setZoomLevel(Math.max(0, Math.min(this.zoomLevel - 1, this.zoomScales.length - 1)));
       this.readZoomScale();
     }
-    else if (event.key === 'ArrowLeft') {
-      const lenseRect = this.wrapperLense.getBoundingClientRect();
-
-      this.updateLense({
-        x: lenseRect.left,
-        y: lenseRect.top + lenseRect.height / 2
-      });
-
-      this.readLensePosition();
-    }
-    else if (event.key === 'ArrowRight') {
-      const lenseRect = this.wrapperLense.getBoundingClientRect();
-
-      this.updateLense({
-        x: lenseRect.left + lenseRect.width,
-        y: lenseRect.top + lenseRect.height / 2
-      });
-
-      this.readLensePosition();
-    }
-    else if (event.key === 'ArrowUp') {
+    else if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
       event.preventDefault();
       const lenseRect = this.wrapperLense.getBoundingClientRect();
 
-      this.updateLense({
-        x: lenseRect.left + lenseRect.width / 2,
-        y: lenseRect.top
-      });
+      let x = lenseRect.left;
+      let y = lenseRect.top;
 
-      this.readLensePosition();
-    }
-    else if (event.key === 'ArrowDown') {
-      event.preventDefault();
-      const lenseRect = this.wrapperLense.getBoundingClientRect();
+      if (event.key === 'ArrowLeft') {
+        y += lenseRect.height / 2;
+      }
+      else if (event.key === 'ArrowRight') {
+        x += lenseRect.width;
+        y += lenseRect.height / 2;
+      }
+      else if (event.key === 'ArrowUp') {
+        x += lenseRect.width / 2;
+      }
+      else if (event.key === 'ArrowDown') {
+        x += lenseRect.width / 2;
+        y += lenseRect.height;
+      }
 
-      this.updateLense({
-        x: lenseRect.left + lenseRect.width / 2,
-        y: lenseRect.top + lenseRect.height
-      });
-
+      this.setLensePosition({ x: x, y: y });
       this.readLensePosition();
     }
   }
@@ -493,9 +499,7 @@ export default class ImageZoom extends H5P.Question {
       return;
     }
 
-    if (event instanceof WheelEvent) {
-      event.preventDefault(); // Don't scroll page.
-    }
+    event.preventDefault(); // Don't scroll page.
 
     this.setZoomLevel(Math.max(0, Math.min(this.zoomLevel - Math.sign(event.deltaY), this.zoomScales.length - 1)));
   }
@@ -506,38 +510,42 @@ export default class ImageZoom extends H5P.Question {
    */
   handleClick(event) {
     if (event.pointerType && event.pointerType !== '' && event.pointerType !== 'mouse') {
-      return; // Potentially touch device, no special handling requested
+      return; // Potentially touch device, leave zoom to pinch zoom on device
     }
 
-    if (!this.params.behaviour.autoZoom || event.target === this.toggleButton) {
-      if (this.isZooming) {
-        if (event.target === this.toggleButton) {
-          this.read(`${Dictionary.get('unmagnified')}`);
-        }
-        this.deactivateZoom();
-      }
-      else {
-        let position = {
-          x: event.pageX,
-          y: event.pageY
-        };
+    if (this.params.behaviour.autoZoom && event.target !== this.toggleButton) {
+      event.preventDefault();
+      return; // Was click on lense
+    }
 
-        if (event.target === this.toggleButton) {
-          this.imageNavigation.focus();
-          this.read(`${Dictionary.get('magnified')} ${Dictionary.get('instructions')}`);
-
-          const imageRect = this.imageNavigation.getBoundingClientRect();
-          position = {
-            x: imageRect.left + imageRect.width / 2,
-            y: imageRect.height / 2
-          };
-        }
-        this.activateZoom();
-        this.updateLense(position);
+    if (this.isZooming) {
+      if (event.target === this.toggleButton) {
+        this.read(`${Dictionary.get('unmagnified')}`);
       }
+
+      this.deactivateZoom();
     }
     else {
-      event.preventDefault();
+      let position = {
+        x: event.pageX,
+        y: event.pageY
+      };
+
+      if (event.target === this.toggleButton) {
+        this.imageNavigation.focus();
+
+        this.read(`${Dictionary.get('magnified')} ${Dictionary.get('instructions')}`);
+
+        // Use center of image for initial position if using keyboard
+        const imageRect = this.imageNavigation.getBoundingClientRect();
+        position = {
+          x: imageRect.left + imageRect.width / 2,
+          y: imageRect.height / 2
+        };
+      }
+
+      this.activateZoom();
+      this.setLensePosition(position);
     }
   }
 
@@ -558,13 +566,13 @@ export default class ImageZoom extends H5P.Question {
    */
   handleMouseMove(event) {
     if (this.params.behaviour.autoZoom && !this.isZooming) {
-      this.activateZoom();
+      this.activateZoom(); // Might have been deactivated by button
     }
     else if (!this.isZooming) {
       return;
     }
 
-    this.updateLense({ x: event.pageX, y: event.pageY });
+    this.setLensePosition({ x: event.pageX, y: event.pageY });
   }
 
   /**
@@ -576,19 +584,5 @@ export default class ImageZoom extends H5P.Question {
     }
 
     this.deactivateZoom();
-  }
-
-  activateZoom() {
-    this.isZooming = true;
-    this.toggleButton.setAttribute('aria-pressed', 'true');
-    this.container.classList.add('h5p-image-zoom-active');
-    this.setZoomLevel(this.zoomLevel);
-  }
-
-  deactivateZoom() {
-    this.isZooming = false;
-    this.toggleButton.setAttribute('aria-pressed', 'false');
-    this.container.classList.remove('h5p-image-zoom-active');
-    this.setZoomLevel(null);
   }
 }

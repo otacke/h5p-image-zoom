@@ -1,6 +1,7 @@
 import he from 'he';
 import Util from './h5p-image-zoom-util';
 
+/** Class for dictionary */
 export default class Dictionary {
   /**
    * Fill dictionary with translations.
