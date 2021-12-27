@@ -1,18 +1,11 @@
-# H5P Boilerplate
-This repository provides you with some boilerplate code in different branches
-that are intended to make creating new content types a little easier.
-
-The master branch holds a very simple example, other branches contain different
-frames for different purposes. The source files may contain some TODOs for
-you in order to fill some functions with life.
-
-Please note that you'll need some familiarity with git and npm.
-
-Please also note that you'll still need some familiarity with how H5P works. If
-you have not yet had a [look at our developer guide](https://h5p.org/developers):
-Now is the right time :-)
+# H5P Image Zoom
+Zoom image sections by hovering over them.
 
 ## Getting started
+It's not enough to just download this code as a zip file and copy it somewhere.
+You will need to build the distribution files first and then pack them with
+the [H5P CLI Tool](https://h5p.org/h5p-cli-guide).
+
 Clone this repository with git and check out the branch that you are interested
 in (or choose the branch first and then download the archive, but learning
 how to use git really makes sense).
@@ -40,3 +33,10 @@ some browsers don't support, you'll have to add a polyfill.
 
 The build process will also move the source files into one distribution file and
 minify the code.
+
+Change to the repositories parent directory and run
+```bash
+h5p pack h5p-image-zoom ~/H5P.ImageZoom.h5p
+```
+
+in order to pack files into an H5P library file in your home directory. Please note that you will have to make sure to install H5P libraries that this content type may depend on yourself.
