@@ -1,0 +1,31 @@
+{
+  "title": "Image Zoom",
+  "description": "Zoom image sections by hovering over them",
+  "majorVersion": 0,
+  "minorVersion": 1,
+  "patchVersion": 0,
+  "runnable": 1,
+  "author": "Oliver Tacke",
+  "license": "MIT",
+  "machineName": "H5P.ImageZoom",
+  "embedTypes": [
+    "iframe"
+  ],
+  "preloadedJs": [
+    {
+      "path": "dist/h5p-image-zoom.js"
+    }
+  ],
+  "preloadedCss": [
+    {
+      "path": "dist/h5p-image-zoom.css"
+    }
+  ],
+  "preloadedDependencies": [
+    {
+      "machineName": "H5P.Image",
+      "majorVersion": 1,
+      "minorVersion": 1
+    }
+  ]
+}

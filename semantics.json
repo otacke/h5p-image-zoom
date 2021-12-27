@@ -1,0 +1,143 @@
+[
+  {
+    "name": "image",
+    "type": "library",
+    "label": "Image",
+    "description": "Image to be used.",
+    "importance": "high",
+    "options": [
+      "H5P.Image 1.1"
+    ]
+  },
+  {
+    "name": "visual",
+    "type": "group",
+    "label": "Visual settings",
+    "importance": "low",
+    "description": "These options will let you control visual aspects.",
+    "fields": [
+      {
+        "name": "imageWidth",
+        "type": "select",
+        "label": "Image width",
+        "description": "Select the width of the space given that the image should cover. The image's height will be scaled accordingly.",
+        "options": [
+          {
+            "value": "35%",
+            "label": "35 %"
+          },
+          {
+            "value": "50%",
+            "label": "50 %"
+          },
+          {
+            "value": "75%",
+            "label": "75 %"
+          },
+          {
+            "value": "100%",
+            "label": "100 %"
+          },
+          {
+            "value": "natural",
+            "label": "Image's natural width"
+          }
+        ],
+        "default": "100%"
+      },
+      {
+        "name": "imageAlignment",
+        "type": "select",
+        "label": "Image alignment",
+        "description": "Select where the image should be positioned relative to the rest of the content.",
+        "options": [
+          {
+            "value": "start",
+            "label": "left"
+          },
+          {
+            "value": "center",
+            "label": "center"
+          },
+          {
+            "value": "end",
+            "label": "right"
+          }
+        ],
+        "default": "center"
+      },
+      {
+        "name": "zoomLenseWidth",
+        "type": "text",
+        "label": "Zoom lense width",
+        "description": "Set the width of the zoom lense as percentage of the image's width (e.g. 20%) or as a fixed value in pixels (e.g. 160px).",
+        "default": "20%",
+        "optional": false,
+        "maxLength": 6
+      },
+      {
+        "name": "zoomLenseHeight",
+        "type": "text",
+        "label": "Zoom lense height",
+        "description": "Set the height of the zoom lense as percentage of the image's height (e.g. 25%) or as a fixed value in pixels (e.g. 90px).",
+        "default": "25%",
+        "optional": false,
+        "maxLength": 6
+      },
+      {
+        "name": "darkenImageOnZoom",
+        "type": "boolean",
+        "label": "Darken image on zoom",
+        "description": "If set, the image will darken to strengthen the focussing effect of zooming.",
+        "default": true,
+        "optional": false
+      }
+    ]
+  },
+  {
+    "name": "behaviour",
+    "type": "group",
+    "label": "Behavioural settings",
+    "importance": "low",
+    "description": "These options will let you control how the task behaves.",
+    "fields": [
+      {
+        "name": "autoZoom",
+        "type": "boolean",
+        "label": "Automatic zooming",
+        "description": "If checked, the image gets magnified automatically while hovering it. Otherwise, the user needs to toggle magnification on and off.",
+        "default": true
+      },
+      {
+        "name": "dummy",
+        "type": "text",
+        "label": "Dummy to work around quirk in H5P Editor that doesn't need to be translated",
+        "importance": "low",
+        "widget": "none"
+      }
+    ]
+  },
+  {
+      "name": "a11y",
+      "type": "group",
+      "common": true,
+      "label": "Screenreader",
+      "importance": "low",
+      "fields": [
+        {
+          "name": "dummy1",
+          "type": "text",
+          "label": "Dummy to work around quirk in H5P Editor that doesn't need to be translated",
+          "importance": "low",
+          "widget": "none"
+        },
+        {
+          "name": "dummy2",
+          "type": "text",
+          "label": "Dummy to work around quirk in H5P Editor that doesn't need to be translated",
+          "importance": "low",
+          "widget": "none"
+        }
+      ]
+  }
+]
