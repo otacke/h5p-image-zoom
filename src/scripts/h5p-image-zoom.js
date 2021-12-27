@@ -152,12 +152,14 @@ export default class ImageZoom extends H5P.Question {
 
     if (this.params.image?.params?.file) {
       this.imageInstance.on('loaded', () => {
+        this.imageLoaded = true;
         this.handleImageLoaded();
       });
     }
     else {
       // H5P.Image provides SVG placeholder that needs height
       wrapperNavigation.classList.add('h5p-image-zoom-image-placeholder');
+      this.imageLoaded = true;
       this.handleImageLoaded();
     }
 
@@ -189,6 +191,11 @@ export default class ImageZoom extends H5P.Question {
     this.container.appendChild(this.displays);
 
     this.setContent(this.container);
+
+    H5P.externalDispatcher.on('initialized', () => {
+      this.isInitialized = true;
+      this.handleImageLoaded();
+    });
   }
 
   /**
@@ -394,6 +401,10 @@ export default class ImageZoom extends H5P.Question {
    * Handle image loaded.
    */
   handleImageLoaded() {
+    if (!this.isInitialized || !this.imageLoaded) {
+      return;
+    }
+
     // Set image width
     const width = this.params.visual.imageWidth === 'natural' ?
       `min(${this.imageNavigation.naturalWidth}px, 100%)` :
