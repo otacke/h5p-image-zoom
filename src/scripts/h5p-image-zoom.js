@@ -233,9 +233,6 @@ export default class ImageZoom extends H5P.Question {
     }
     this.toggleButton.setAttribute('aria-pressed', 'false');
     this.toggleButton.setAttribute('aria-label', Dictionary.get('magnify'));
-    this.toggleButton.addEventListener('keydown', (event) => {
-      this.handleKeydown(event);
-    });
     this.displayNavigation.appendChild(this.toggleButton);
 
     this.setContent(this.container);
@@ -300,6 +297,10 @@ export default class ImageZoom extends H5P.Question {
 
     this.displayNavigation.addEventListener('wheel', event => {
       this.handleWheel(event);
+    });
+
+    this.toggleButton.addEventListener('keydown', (event) => {
+      this.handleKeydown(event);
     });
 
     this.trigger('resize');
@@ -504,6 +505,10 @@ export default class ImageZoom extends H5P.Question {
    * @param {Event} event Click event.
    */
   handleClick(event) {
+    if (event.pointerType && event.pointerType !== '' && event.pointerType !== 'mouse') {
+      return; // Potentially touch device, no special handling requested
+    }
+
     if (!this.params.behaviour.autoZoom || event.target === this.toggleButton) {
       if (this.isZooming) {
         if (event.target === this.toggleButton) {
