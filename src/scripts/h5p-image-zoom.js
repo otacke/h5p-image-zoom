@@ -436,6 +436,10 @@ export default class ImageZoom extends H5P.Question {
       this.handleClick(event);
     });
 
+    this.displayNavigation.addEventListener('touchstart', () => {
+      this.handleTouchStart();
+    });
+
     this.displayNavigation.addEventListener('mouseover', () => {
       this.handleMouseOver();
     });
@@ -521,6 +525,7 @@ export default class ImageZoom extends H5P.Question {
    */
   handleClick(event) {
     if (event.pointerType && event.pointerType !== '' && event.pointerType !== 'mouse') {
+      event.preventDefault();
       return; // Potentially touch device, leave zoom to pinch zoom on device
     }
 
@@ -561,10 +566,25 @@ export default class ImageZoom extends H5P.Question {
   }
 
   /**
+   * Handle touch start.
+   * Touch devices may issue an emulated mousemove after touchend, but
+   * touch devices should rely on pinch zoom.
+   */
+  handleTouchStart() {
+    this.isTouching = true;
+
+    // mousemove would have been issued after 1s
+    clearTimeout(this.touchstartTimeout);
+    this.touchstartTimeout = setTimeout(() => {
+      this.isTouching = false;
+    }, 1000);
+  }
+
+  /**
    * Handle pointer enters image.
    */
   handleMouseOver() {
-    if (!this.params.behaviour.autoZoom) {
+    if (!this.params.behaviour.autoZoom || this.isTouching) {
       return;
     }
 
@@ -576,6 +596,13 @@ export default class ImageZoom extends H5P.Question {
    * @param {Event} event Mouse event.
    */
   handleMouseMove(event) {
+    if (this.isTouching) {
+      // Event triggered by touch. Possible future: check event.pointerType
+      clearTimeout(this.touchstartTimeout);
+      this.isTouching = false;
+      return;
+    }
+
     if (this.params.behaviour.autoZoom && !this.isZooming) {
       this.activateZoom(); // Might have been deactivated by button
     }
