@@ -1,6 +1,6 @@
 {
   "name": "h5p-image-zoom",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Zoom image sections by hovering over them",
   "private": true,
   "scripts": {
