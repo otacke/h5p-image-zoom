@@ -102,6 +102,10 @@
             &::before {
               content: $icon-button-zoom;
               font-family: 'H5PFontAwesome4';
+              left: 50%;
+              position: absolute;
+              top: 50%;
+              transform: translate(-50%, -50%);
             }
 
             &.h5p-image-zoom-button-toggle-hidden {
