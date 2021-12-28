@@ -52,7 +52,7 @@
         "description": "Select where the image should be positioned relative to the rest of the content.",
         "options": [
           {
-            "value": "start",
+            "value": "flex-start",
             "label": "left"
           },
           {
@@ -60,7 +60,7 @@
             "label": "center"
           },
           {
-            "value": "end",
+            "value": "flex-end",
             "label": "right"
           }
         ],
