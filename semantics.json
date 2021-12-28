@@ -67,19 +67,19 @@
         "default": "center"
       },
       {
-        "name": "zoomLenseWidth",
+        "name": "zoomLensWidth",
         "type": "text",
-        "label": "Zoom lense width",
-        "description": "Set the width of the zoom lense as percentage of the image's width (e.g. 20%) or as a fixed value in pixels (e.g. 160px).",
+        "label": "Zoom lens width",
+        "description": "Set the width of the zoom lens as percentage of the image's width (e.g. 20%) or as a fixed value in pixels (e.g. 160px).",
         "default": "20%",
         "optional": false,
         "maxLength": 6
       },
       {
-        "name": "zoomLenseHeight",
+        "name": "zoomLensHeight",
         "type": "text",
-        "label": "Zoom lense height",
-        "description": "Set the height of the zoom lense as percentage of the image's height (e.g. 25%) or as a fixed value in pixels (e.g. 90px).",
+        "label": "Zoom lens height",
+        "description": "Set the height of the zoom lens as percentage of the image's height (e.g. 25%) or as a fixed value in pixels (e.g. 90px).",
         "default": "25%",
         "optional": false,
         "maxLength": 6
@@ -155,7 +155,7 @@
           "type": "text",
           "label": "Instructions",
           "description": "Instructions on how to use the keyboard. Read when the magnification is activated",
-          "default": "Use arrow keys to move magnification lense. Use plus key to zoom in. Use minus key to zoom out.",
+          "default": "Use arrow keys to move magnification lens. Use plus key to zoom in. Use minus key to zoom out.",
           "importance": "low"
         },
         {
@@ -167,18 +167,18 @@
           "importance": "low"
         },
         {
-          "name": "movedLenseTo",
+          "name": "movedLensTo",
           "type": "text",
-          "label": "Moved lense to",
-          "description": "Read when the magnification lense is moved. @positionHorizontal and @positionVertical are placeholders that will be replaced by the respective values.",
-          "default": "Moved lense to @positionHorizontal horizontally and to @positionVertical vertically.",
+          "label": "Moved lens to",
+          "description": "Read when the magnification lens is moved. @positionHorizontal and @positionVertical are placeholders that will be replaced by the respective values.",
+          "default": "Moved lens to @positionHorizontal horizontally and to @positionVertical vertically.",
           "importance": "low"
         },
         {
           "name": "unknown",
           "type": "text",
           "label": "Unknown",
-          "description": "Fallback text for when the position of the lense cannot be determined.",
+          "description": "Fallback text for when the position of the lens cannot be determined.",
           "default": "unknown",
           "importance": "low"
         }
