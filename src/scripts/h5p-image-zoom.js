@@ -529,6 +529,12 @@ export default class ImageZoom extends H5P.Question {
       return; // Potentially touch device, leave zoom to pinch zoom on device
     }
 
+    // iOS sometimes issues MouseEvent without TouchEvent up front.
+    if (Util.isIOS()) {
+      event.preventDefault();
+      return;
+    }
+
     if (this.params.behaviour.autoZoom && event.target !== this.toggleButton) {
       event.preventDefault();
       return; // Was click on lens
@@ -568,7 +574,7 @@ export default class ImageZoom extends H5P.Question {
   /**
    * Handle touch start.
    * Touch devices may issue an emulated mousemove after touchend, but
-   * touch devices should rely on pinch zoom.
+   * touch devices should allow pinch zoom, so can't use event.preventDefault()
    */
   handleTouchStart() {
     this.isTouching = true;
@@ -584,7 +590,10 @@ export default class ImageZoom extends H5P.Question {
    * Handle pointer enters image.
    */
   handleMouseOver() {
-    if (!this.params.behaviour.autoZoom || this.isTouching) {
+    if (
+      !this.params.behaviour.autoZoom || this.isTouching ||
+      Util.isIOS() // iOS sometimes triggers MouseEvent without TouchEvent
+    ) {
       return;
     }
 
@@ -596,10 +605,11 @@ export default class ImageZoom extends H5P.Question {
    * @param {Event} event Mouse event.
    */
   handleMouseMove(event) {
-    if (this.isTouching) {
+    if (
+      this.isTouching ||
+      Util.isIOS()  // iOS sometimes triggers MouseEvent without TouchEvent
+    ) {
       // Event triggered by touch. Possible future: check event.pointerType
-      clearTimeout(this.touchstartTimeout);
-      this.isTouching = false;
       return;
     }
 

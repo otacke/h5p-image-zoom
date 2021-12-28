@@ -33,4 +33,15 @@ export default class Util {
   static project(value, lo1, hi1, lo2, hi2) {
     return lo2 + (hi2 - lo2) * (value - lo1) / (hi1 - lo1);
   }
+
+  /**
+   * Detect whether user is running iOS.
+   * @return {boolean} True, if user is running iOS.
+   */
+  static isIOS() {
+    return (
+      ['iPad Simulator', 'iPhone Simulator', 'iPod Simulator', 'iPad', 'iPhone', 'iPod'].includes(navigator.platform) ||
+      (navigator.userAgent.includes('Mac') && 'ontouchend' in document)
+    );
+  }
 }
