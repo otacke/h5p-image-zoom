@@ -5,7 +5,7 @@
   "minorVersion": 1,
   "patchVersion": 2,
   "runnable": 1,
-  "author": "Oliver Tacke",
+  "author": "Oliver Tacke, University of Saskatchewan",
   "license": "MIT",
   "machineName": "H5P.ImageZoom",
   "embedTypes": [
