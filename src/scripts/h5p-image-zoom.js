@@ -23,7 +23,7 @@ export default class ImageZoom extends H5P.Question {
       behaviour: {
         autoZoom: true,
         hideMagnificationIndicator: false,
-        zoomScales: '1, 1.25, 1.5, 2, 3, 5',
+        zoomScales: '1, 1.25, 1.5, 2, 3, 5', // Might go in editor at some point
         zoomLevelDefault: 2
       }
     }, params);
@@ -364,7 +364,7 @@ export default class ImageZoom extends H5P.Question {
 
     /*
      * 99.5 instead of 100, because otherwise magnification may cause margin.
-     * Will still be read as 100% to screenreader due to rounding
+     * Will still be read as 100% to screen reader due to rounding
      */
     const cappedPositionPercentage = {
       x: Util.project(cappedPosition.x, lensOffsets.minX, lensOffsets.maxX, 0, 99.5),
@@ -375,7 +375,7 @@ export default class ImageZoom extends H5P.Question {
   }
 
   /**
-   * Read lens position to screenreader.
+   * Read lens position to screen reader.
    */
   readLensPosition() {
     let x, y;
@@ -389,7 +389,7 @@ export default class ImageZoom extends H5P.Question {
   }
 
   /**
-   * Read zoom scale to screenreader.
+   * Read zoom scale to screen reader.
    */
   readZoomScale() {
     const screenreaderText = Dictionary.get('zoomedToScale')
