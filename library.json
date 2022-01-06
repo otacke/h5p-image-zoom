@@ -1,9 +1,9 @@
 {
   "title": "Image Zoom",
   "description": "Zoom image sections by hovering over them",
-  "majorVersion": 0,
-  "minorVersion": 1,
-  "patchVersion": 2,
+  "majorVersion": 1,
+  "minorVersion": 0,
+  "patchVersion": 0,
   "runnable": 1,
   "author": "Oliver Tacke, University of Saskatchewan",
   "license": "MIT",
