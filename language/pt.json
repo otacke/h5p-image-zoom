@@ -6,7 +6,7 @@
     },
     {
       "label": "Configurações de visualização",
-      "description": "Estas opções permitirão controlar algusn aspetos visuais.",
+      "description": "Estas opções permitirão controlar alguns aspetos visuais.",
       "fields": [
         {
           "label": "Largura da imagem",
