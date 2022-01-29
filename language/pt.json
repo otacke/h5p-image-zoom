@@ -1,0 +1,118 @@
+{
+  "semantics": [
+    {
+      "label": "Imagem",
+      "description": "Imagem a usar."
+    },
+    {
+      "label": "Configurações de visualização",
+      "description": "Estas opções permitirão controlar alguns aspetos visuais.",
+      "fields": [
+        {
+          "label": "Largura da imagem",
+          "description": "Selecionar a largura do espaço que a imagem deverá ocupar. A altura da imagem será ajustada à escala, nunca excedendo os 100%.",
+          "options": [
+            {
+              "label": "35 %"
+            },
+            {
+              "label": "50 %"
+            },
+            {
+              "label": "75 %"
+            },
+            {
+              "label": "100 %"
+            },
+            {
+              "label": "Dimensão original da imagem"
+            }
+          ]
+        },
+        {
+          "label": "Alinhamento da imagem",
+          "description": "Selecionar onde a imagem será posicionada, relativamente ao restante conteúdo.",
+          "options": [
+            {
+              "label": "Esquerda"
+            },
+            {
+              "label": "Centro"
+            },
+            {
+              "label": "Direita"
+            }
+          ]
+        },
+        {
+          "label": "Largura da lente de ampliação",
+          "description": "Configurar a largura da lente de ampliação, em percentagem da largura da imagem (por exemplo: 20%), ou fixar o seu valor em pixels (por exemplo, 160px).",
+          "default": "20%"
+        },
+        {
+          "label": "Altura da Lente de ampliação",
+          "description": "Configurar a altura da lente de ampliação, em percentagem da altura da imagem (por exemplo: 25%), ou fixar o seu valor em pixels (por exemplo, 90px).",
+          "default": "25%"
+        },
+        {
+          "label": "Escurecer a parte ampliada da imagem",
+          "description": "Se selecionado, a parte ampliada da imagem será escurecida, para fortalecer o efeito de foco da ampliação."
+        }
+      ]
+    },
+    {
+      "label": "Configurações de comportamento",
+      "description": "Estas opções permitem controlar o comportamento do conteúdo.",
+      "fields": [
+        {
+          "label": "Ampliação automática",
+          "description": "Se selecionado, a imagem será automaticamente ampliada à medida que se desloca o indicador do rato. Em alternativa, o utilizador necessita de ligar ou desligar o efeito de ampliação, no respetivo indicador/botão."
+        },
+        {
+          "label": "Esconder o indicador de ampliação",
+          "description": "Existe um indicador de ampliação, usado como botão. Esconder o mesmo, impedirá o utilizador de o ligar ou desligar, e este terá menor quantidade de informação."
+        }
+      ]
+    },
+    {
+      "label": "Leitura de ecrã",
+      "fields": [
+        {
+          "label": "Ampliar",
+          "description": "Texto a visualizar no indicador/botão de ampliação (apenas visível na leitura de ecrã).",
+          "default": "Ampliar"
+        },
+        {
+          "label": "Ampliação ativada.",
+          "description": "Lido quando a ampliação está ativada.",
+          "default": "Ampliação ativada."
+        },
+        {
+          "label": "Ampliação desativada.",
+          "description": "Lido quando a ampliação está desativada.",
+          "default": "Ampliação desativada."
+        },
+        {
+          "label": "Instruções",
+          "description": "Instruções sobre como usar o teclado. Lido quando a ampliação está ativada.",
+          "default": "Use as teclas de direção para mover a lente de ampliação. Use a tecla mais para ampliar. Use a tecla menos para desativar a ampliação."
+        },
+        {
+          "label": "Ampliação para a escala",
+          "description": "Lido quando a escala de ampliação é alterada. @magnification é uma variável que será substituida pelo respetivo valor.",
+          "default": "Escala de ampliação alterada para @magnification para 1."
+        },
+        {
+          "label": "Mover a lente de ampliação para",
+          "description": "Lido quando a lente de ampliação é movida. @positionHorizontal e @positionVertical são marcadores que serão substituidos pelos respetivos valores",
+          "default": "A lente de ampliação foi movida para @positionHorizontal horizontalmente, e para @positionVertical verticalmente."
+        },
+        {
+          "label": "Posição desconhecida",
+          "description": "Texto a visualizar quando não é possível de determinar a posição da lente.",
+          "default": "A posição da lente é desconhecida"
+        }
+      ]
+    }
+  ]
+}
