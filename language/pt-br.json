@@ -1,7 +1,7 @@
 {
   "semantics": [
     {
-      "label": "Image",
+      "label": "Imagem",
       "description": "Imagem a ser utilizada."
     },
     {
@@ -62,7 +62,7 @@
     },
     {
       "label": "Configurações comportamentais",
-      "description": "Estas opções lhe permitirão controlar como a tarefa se comporta.",
+      "description": "Essas opções permitem controlar como a tarefa se comporta.",
       "fields": [
         {
           "label": "Zoom automático",
