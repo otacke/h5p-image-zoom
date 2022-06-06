@@ -61,8 +61,8 @@
       ]
     },
     {
-      "label": "Configurações de comportamento",
-      "description": "Estas opções permitem controlar o comportamento do conteúdo.",
+      "label": "Behavioural settings",
+      "description": "These options will let you control how the task behaves.",
       "fields": [
         {
           "label": "Ampliação automática",
