@@ -61,8 +61,8 @@
       ]
     },
     {
-      "label": "Configuraciones del comportamiento",
-      "description": "Estas opciones le permitirán controlar como se comporta el trabajo.",
+      "label": "Configuración del comportamiento",
+      "description": "Estas opciones le permitirán controlar como se comporta la tarea.",
       "fields": [
         {
           "label": "Zoom automático",
