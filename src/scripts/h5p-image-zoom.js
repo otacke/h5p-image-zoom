@@ -1,10 +1,9 @@
-import Dictionary from './h5p-image-zoom-dictionary';
-import Util from './h5p-image-zoom-util';
+import Dictionary from '@scripts/h5p-image-zoom-dictionary';
+import Util from '@services/util';
 
 export default class ImageZoom extends H5P.Question {
   /**
-   * @constructor
-   *
+   * @class
    * @param {object} params Parameters passed by the editor.
    * @param {number} contentId Content's id.
    */
@@ -52,11 +51,11 @@ export default class ImageZoom extends H5P.Question {
   /**
    * SanitizeCSS value.
    * @param {string|number} cssValue CSS value.
-   * @param {object} [params={}] Parameters.
+   * @param {object} [params] Parameters.
    * @param {number} [params.min] Minimum numerical value.
    * @param {number} [params.max] Maximum numerical value.
    * @param {string} [params.default] Default value.
-   * @return {string|null} Value and unit separated by space or null.
+   * @returns {string|null} Value and unit separated by space or null.
    */
   sanititzeCSS(cssValue, params = {}) {
     params.default = typeof params.default === 'string' ? params.default : null;
@@ -201,7 +200,7 @@ export default class ImageZoom extends H5P.Question {
   /**
    * Get zoom scale.
    * @param {number} [zoomLevel] Zoom level, defaults to global state.
-   * @return {number} Zoom scale.
+   * @returns {number|undefined} Zoom scale.
    */
   getZoomScale(zoomLevel) {
     zoomLevel = zoomLevel || this.zoomLevel;
@@ -261,7 +260,7 @@ export default class ImageZoom extends H5P.Question {
 
   /**
    * Get zoom lens width and height as percentage.
-   * @return {object} Zoom lens width and height as percentage.
+   * @returns {object} Zoom lens width and height as percentage.
    */
   getLensSize() {
     let imageRect;
@@ -300,13 +299,13 @@ export default class ImageZoom extends H5P.Question {
 
   /**
    * Get Lens position as rounded percentage.
-   * @return {object} Position with x and y part.
+   * @returns {object} Position with x and y part.
    */
   getLensPosition() {
     let positions = this.imageLens.style.transformOrigin.split(' ');
     if (
       positions.length === 2 &&
-      positions.every(position => /^\d*(.\d+)?%$/.test(position))
+      positions.every((position) => /^\d*(.\d+)?%$/.test(position))
     ) {
       positions = positions.map((value) => {
         return `${Math.round(parseFloat(value))} %`;
@@ -432,7 +431,7 @@ export default class ImageZoom extends H5P.Question {
    */
   addEventListeners() {
     // Also handles enter/space on toggle button
-    this.displayNavigation.addEventListener('click', event => {
+    this.displayNavigation.addEventListener('click', (event) => {
       this.handleClick(event);
     });
 
@@ -444,7 +443,7 @@ export default class ImageZoom extends H5P.Question {
       this.handleMouseOver();
     });
 
-    this.displayNavigation.addEventListener('mousemove', event => {
+    this.displayNavigation.addEventListener('mousemove', (event) => {
       this.handleMouseMove(event);
     });
 
@@ -452,7 +451,7 @@ export default class ImageZoom extends H5P.Question {
       this.handleMouseOut(event);
     });
 
-    this.displayNavigation.addEventListener('wheel', event => {
+    this.displayNavigation.addEventListener('wheel', (event) => {
       this.handleWheel(event);
     });
 
@@ -463,7 +462,7 @@ export default class ImageZoom extends H5P.Question {
 
   /**
    * Handle key down.
-   * @param {KeyEvent} event Key event.
+   * @param {KeyboardEvent} event Keyboard event.
    */
   handleKeydown(event) {
     if (!this.isZooming) {

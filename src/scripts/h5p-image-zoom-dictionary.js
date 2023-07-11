@@ -1,5 +1,5 @@
 import he from 'he';
-import Util from './h5p-image-zoom-util';
+import Util from '@services/util';
 
 /** Class for dictionary */
 export default class Dictionary {
@@ -15,7 +15,7 @@ export default class Dictionary {
   /**
    * Get translation for a key.
    * @param {string} key Key to look for.
-   * @return {string} Translation.
+   * @returns {string} Translation.
    */
   static get(key) {
     return Dictionary.translation[key];
@@ -24,7 +24,7 @@ export default class Dictionary {
   /**
    * Sanitize translations recursively: HTML decode and strip HTML.
    * @param {object|string} translation Translation.
-   * @return {object|string} Sanitized translation.
+   * @returns {object|string} Sanitized translation.
    */
   static sanitize(translation) {
     if (typeof translation === 'object') {
