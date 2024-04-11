@@ -1,5 +1,5 @@
-import Dictionary from '@scripts/h5p-image-zoom-dictionary';
-import Util from '@services/util';
+import Dictionary from '@scripts/h5p-image-zoom-dictionary.js';
+import Util from '@services/util.js';
 
 export default class ImageZoom extends H5P.Question {
   /**

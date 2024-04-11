@@ -1,5 +1,5 @@
 import he from 'he';
-import Util from '@services/util';
+import Util from '@services/util.js';
 
 /** Class for dictionary */
 export default class Dictionary {
