@@ -1,6 +1,15 @@
 import Dictionary from '@scripts/h5p-image-zoom-dictionary.js';
 import Util from '@services/util.js';
 
+/** @constant {number} COORDINATE_PAIR_LENGTH Number of coordinates in a coordinate pair. */
+const COORDINATE_PAIR_LENGTH = 2;
+
+/** @constant {number} TOUCHSTART_TIMEOUT_MS Time to wait after touchstart before assuming no more touch events. */
+const TOUCHSTART_TIMEOUT_MS = 1000;
+
+/** @constant {number} POSITION_PERCENTAGE_MAX Maximum percentage for position to avoid margin due to magnification. */
+const POSITION_PERCENTAGE_MAX = 99.5;
+
 export default class ImageZoom extends H5P.Question {
   /**
    * @class
@@ -17,14 +26,14 @@ export default class ImageZoom extends H5P.Question {
         imageAlignment: 'center',
         zoomLensWidth: '20%',
         zoomLensHeight: '25%',
-        darkenImageOnZoom: true
+        darkenImageOnZoom: true,
       },
       behaviour: {
         autoZoom: true,
         hideMagnificationIndicator: false,
         zoomScales: '1, 1.25, 1.5, 2, 3, 5', // Might go in editor at some point
-        zoomLevelDefault: 2
-      }
+        zoomLevelDefault: 2,
+      },
     }, params);
     this.contentId = contentId;
 
@@ -33,7 +42,7 @@ export default class ImageZoom extends H5P.Question {
 
     this.zoomLensSize = {
       width: this.sanititzeCSS(this.params.visual.zoomLensWidth, { min: 1, default: '20 %' }),
-      height: this.sanititzeCSS(this.params.visual.zoomLensHeight, { min: 1, default: '25 %' })
+      height: this.sanititzeCSS(this.params.visual.zoomLensHeight, { min: 1, default: '25 %' }),
     };
     this.zoomScales = this.params.behaviour.zoomScales.split(',');
 
@@ -44,6 +53,7 @@ export default class ImageZoom extends H5P.Question {
       ) {
         return this.params.behaviour.zoomLevelDefault;
       }
+      // eslint-disable-next-line no-magic-numbers
       return Math.floor(this.zoomScales.length / 2);
     })();
   }
@@ -73,17 +83,20 @@ export default class ImageZoom extends H5P.Question {
     let value;
     let unit;
 
+    const unitPx = 'px';
+    const unitPercent = '%';
+
     if (/^[+-]?([0-9]*[.])?[0-9]+$/.test(cssValue)) {
-      unit = 'px';
+      unit = unitPx;
       value = cssValue.trim();
     }
-    else if (cssValue.substr(-2) === 'px') {
-      unit = 'px';
-      value = cssValue.substr(0, cssValue.length - 2).trim();
+    else if (cssValue.substring(cssValue.length - unitPx.length) === unitPx) {
+      unit = unitPx;
+      value = cssValue.substring(0, cssValue.length - unitPx.length).trim();
     }
-    else if (cssValue.substr(-1) === '%') {
-      unit = '%';
-      value = cssValue.substr(0, cssValue.length - 1).trim();
+    else if (cssValue.substring(cssValue.length - unitPercent.length) === unitPercent) {
+      unit = unitPercent;
+      value = cssValue.substring(0, cssValue.length - unitPercent.length).trim();
     }
     else {
       return params.default;
@@ -136,7 +149,7 @@ export default class ImageZoom extends H5P.Question {
       this.contentId,
       H5P.jQuery(wrapperNavigation),
       true,
-      {}
+      {},
     );
     this.imageNavigation = this.imageInstance.$img.get(0);
     this.imageNavigation.setAttribute('draggable', false);
@@ -171,7 +184,7 @@ export default class ImageZoom extends H5P.Question {
       this.contentId,
       H5P.jQuery(this.wrapperLens),
       true,
-      {}
+      {},
     );
     this.imageLens = this.imageInstanceLens.$img.get(0);
     this.imageLens.classList.add('h5p-image-zoom-image-lens');
@@ -235,7 +248,9 @@ export default class ImageZoom extends H5P.Question {
 
     this.zoomLevel = zoomLevel;
     const lensSize = this.getLensSize();
-    this.imageLens.style.transform = `scale(${this.getZoomScale(this.zoomLevel) / lensSize.widthFactor}, ${this.getZoomScale(this.zoomLevel) / lensSize.heightFactor})`;
+    const horizontalScale = this.getZoomScale(this.zoomLevel) / lensSize.widthFactor;
+    const verticalScale = this.getZoomScale(this.zoomLevel) / lensSize.heightFactor;
+    this.imageLens.style.transform = `scale(${horizontalScale}, ${verticalScale})`;
   }
 
   /**
@@ -293,7 +308,7 @@ export default class ImageZoom extends H5P.Question {
       widthFactor: widthFactor,
       height: heightValue,
       heightUnit: heightUnit,
-      heightFactor: heightFactor
+      heightFactor: heightFactor,
     };
   }
 
@@ -304,7 +319,7 @@ export default class ImageZoom extends H5P.Question {
   getLensPosition() {
     let positions = this.imageLens.style.transformOrigin.split(' ');
     if (
-      positions.length === 2 &&
+      positions.length === COORDINATE_PAIR_LENGTH &&
       positions.every((position) => /^\d*(.\d+)?%$/.test(position))
     ) {
       positions = positions.map((value) => {
@@ -317,7 +332,7 @@ export default class ImageZoom extends H5P.Question {
 
     return {
       x: positions[0],
-      y: positions[1]
+      y: positions[1],
     };
   }
 
@@ -333,32 +348,38 @@ export default class ImageZoom extends H5P.Question {
 
     const imagePointerPosition = {
       x: position.x - imageRect.left,
-      y: position.y - imageRect.top
+      y: position.y - imageRect.top,
     };
 
     const lensPosition = {
+      // eslint-disable-next-line no-magic-numbers
       x: Math.max(0, Math.min(imagePointerPosition.x - lensRect.width / 2, imageRect.width - lensRect.width)),
-      y: Math.max(0, Math.min(imagePointerPosition.y - lensRect.height / 2, imageRect.height - lensRect.height))
+      // eslint-disable-next-line no-magic-numbers
+      y: Math.max(0, Math.min(imagePointerPosition.y - lensRect.height / 2, imageRect.height - lensRect.height)),
     };
 
     const lensPositionPercentage = {
       x: lensPosition.x / imageRect.width * 100,
-      y: lensPosition.y / imageRect.height * 100
+      y: lensPosition.y / imageRect.height * 100,
     };
 
     this.wrapperLens.style.left = `${lensPositionPercentage.x}%`;
     this.wrapperLens.style.top = `${lensPositionPercentage.y}%`;
 
     const lensOffsets = {
+      // eslint-disable-next-line no-magic-numbers
       minX: lensRect.width / 2,
+      // eslint-disable-next-line no-magic-numbers
       maxX: imageRect.width - lensRect.width / 2,
+      // eslint-disable-next-line no-magic-numbers
       minY: lensRect.height / 2,
-      maxY: imageRect.height - lensRect.height / 2
+      // eslint-disable-next-line no-magic-numbers
+      maxY: imageRect.height - lensRect.height / 2,
     };
 
     const cappedPosition = {
       x: Math.max(lensOffsets.minX, Math.min(imagePointerPosition.x, lensOffsets.maxX)),
-      y: Math.max(lensOffsets.minY, Math.min(imagePointerPosition.y, lensOffsets.maxY))
+      y: Math.max(lensOffsets.minY, Math.min(imagePointerPosition.y, lensOffsets.maxY)),
     };
 
     /*
@@ -366,8 +387,8 @@ export default class ImageZoom extends H5P.Question {
      * Will still be read as 100% to screen reader due to rounding
      */
     const cappedPositionPercentage = {
-      x: Util.project(cappedPosition.x, lensOffsets.minX, lensOffsets.maxX, 0, 99.5),
-      y: Util.project(cappedPosition.y, lensOffsets.minY, lensOffsets.maxY, 0, 99.5)
+      x: Util.project(cappedPosition.x, lensOffsets.minX, lensOffsets.maxX, 0, POSITION_PERCENTAGE_MAX),
+      y: Util.project(cappedPosition.y, lensOffsets.minY, lensOffsets.maxY, 0, POSITION_PERCENTAGE_MAX),
     };
 
     this.imageLens.style.transformOrigin = `${cappedPositionPercentage.x}% ${cappedPositionPercentage.y}%`;
@@ -485,16 +506,20 @@ export default class ImageZoom extends H5P.Question {
       let y = lensRect.top;
 
       if (event.key === 'ArrowLeft') {
+        // eslint-disable-next-line no-magic-numbers
         y += lensRect.height / 2;
       }
       else if (event.key === 'ArrowRight') {
         x += lensRect.width;
+        // eslint-disable-next-line no-magic-numbers
         y += lensRect.height / 2;
       }
       else if (event.key === 'ArrowUp') {
+        // eslint-disable-next-line no-magic-numbers
         x += lensRect.width / 2;
       }
       else if (event.key === 'ArrowDown') {
+        // eslint-disable-next-line no-magic-numbers
         x += lensRect.width / 2;
         y += lensRect.height;
       }
@@ -549,7 +574,7 @@ export default class ImageZoom extends H5P.Question {
     else {
       let position = {
         x: event.pageX,
-        y: event.pageY
+        y: event.pageY,
       };
 
       if (event.target === this.toggleButton) {
@@ -560,8 +585,10 @@ export default class ImageZoom extends H5P.Question {
         // Use center of image for initial position if using keyboard
         const imageRect = this.imageNavigation.getBoundingClientRect();
         position = {
+          // eslint-disable-next-line no-magic-numbers
           x: imageRect.left + imageRect.width / 2,
-          y: imageRect.height / 2
+          // eslint-disable-next-line no-magic-numbers
+          y: imageRect.height / 2,
         };
       }
 
@@ -582,7 +609,7 @@ export default class ImageZoom extends H5P.Question {
     clearTimeout(this.touchstartTimeout);
     this.touchstartTimeout = setTimeout(() => {
       this.isTouching = false;
-    }, 1000);
+    }, TOUCHSTART_TIMEOUT_MS);
   }
 
   /**
