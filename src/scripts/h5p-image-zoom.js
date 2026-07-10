@@ -15,9 +15,11 @@ export default class ImageZoom extends H5P.Question {
    * @class
    * @param {object} params Parameters passed by the editor.
    * @param {number} contentId Content's id.
+   * @param {object} extras Content data.
    */
-  constructor(params, contentId) {
+  constructor(params, contentId, extras = {}) {
     super('image-zoom');
+    this.extras = extras;
 
     // Set defaults
     this.params = Util.extend({
@@ -658,5 +660,13 @@ export default class ImageZoom extends H5P.Question {
     }
 
     this.deactivateZoom();
+  }
+
+  /**
+   * Workaround for H5P core mutating prototype to inject its isRoot, but ES6 inheritance here.
+   * @returns {boolean} True, if content type is root. Else false.
+   */
+  isRoot() {
+    return !!this.extras.standalone;
   }
 }
